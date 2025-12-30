@@ -19,68 +19,354 @@ SKILL_CONFIG = {
         "compliance",
         "hr policies",
         "hris",
-        "people management",
         "onboarding",
         "offboarding",
         "training and development",
         "succession planning",
-        "shrm",
-        "phr",
-        "compensation management"
+        "compensation management",
+
+        # HR Analytics / Modern HR
+        "people analytics",
+        "hr metrics",
+        "workforce planning",
+        "workforce insights",
+        "data driven decision making",
+        "attrition analysis",
+        "employee engagement analytics",
+        "ai tools in hr"
     ],
 
     # ===============================
     # INFORMATION TECHNOLOGY
     # ===============================
-    "it": [
-        "python", "java", "javascript", "react",
-        "node", "sql", "mongodb", "aws",
-        "docker", "kubernetes", "linux",
-        "machine learning", "deep learning",
-        "data science", "api", "cloud computing"
+    "information-technology": [
+        "software development",
+        "programming",
+        "python",
+        "java",
+        "javascript",
+        "react",
+        "node",
+        "sql",
+        "mongodb",
+        "database",
+        "etl",
+        "cloud computing",
+        "aws",
+        "azure",
+        "docker",
+        "kubernetes",
+        "linux",
+        "machine learning",
+        "deep learning",
+        "data science",
+        "api development",
+        "web development",
+        "software testing",
+        "cyber security",
+        "networking",
+        "blockchain"
     ],
 
     # ===============================
-    # CIVIL / CONSTRUCTION
+    # ENGINEERING (GENERIC)
+    # ===============================
+    "engineering": [
+        "engineering fundamentals",
+        "technical analysis",
+        "problem solving",
+        "technical documentation",
+        "quality assurance"
+    ],
+
+    # ===============================
+    # CONSTRUCTION / INFRASTRUCTURE
+    # ===============================
+    "construction": [
+        "construction",
+        "site execution",
+        "contractor management",
+        "infrastructure projects",
+        "billing",
+        "estimation",
+        "quality control",
+        "site safety"
+    ],
+
+    # ===============================
+    # CIVIL ENGINEERING
     # ===============================
     "civil": [
-        "civil engineering", "construction",
-        "site engineer", "structural engineering",
-        "geotechnical", "surveying",
+        "civil engineering",
+        "site engineer",
+        "structural engineering",
+        "geotechnical engineering",
+        "surveying",
         "quantity surveying",
-        "rcc", "steel structures",
-        "concrete", "foundation",
-        "brickwork", "autocad",
-        "staad", "etabs", "revit",
-        "ms project", "primavera",
-        "billing", "estimation",
-        "cost control", "quality control",
-        "safety", "is codes"
+        "rcc",
+        "steel structures",
+        "concrete technology",
+        "foundation engineering",
+        "brickwork",
+        "autocad",
+        "staad",
+        "etabs",
+        "revit",
+        "ms project",
+        "primavera",
+        "is codes"
     ],
 
     # ===============================
-    # MANAGEMENT / BUSINESS
+    # ACCOUNTING / FINANCE
+    # ===============================
+    "accountant": [
+        "accounting",
+        "tally",
+        "gst",
+        "taxation",
+        "audit",
+        "balance sheet",
+        "ledger",
+        "bookkeeping",
+        "financial reporting",
+        "income tax",
+        "cost accounting"
+    ],
+
+    "finance": [
+        "financial analysis",
+        "investment analysis",
+        "portfolio management",
+        "wealth management",
+        "risk analysis",
+        "budgeting",
+        "financial forecasting"
+    ],
+
+    "banking": [
+        "banking operations",
+        "loan processing",
+        "credit analysis",
+        "debit operations",
+        "relationship management",
+        "retail banking"
+    ],
+
+    # ===============================
+    # LEGAL / ADVOCACY
+    # ===============================
+    "advocate": [
+        "legal drafting",
+        "litigation",
+        "court procedures",
+        "criminal law",
+        "civil law",
+        "contract law",
+        "legal compliance",
+        "case analysis"
+    ],
+
+    # ===============================
+    # AGRICULTURE
+    # ===============================
+    "agriculture": [
+        "agriculture",
+        "farming",
+        "crop management",
+        "agronomy",
+        "soil science",
+        "irrigation management",
+        "harvesting",
+        "fertilizers",
+        "pest control"
+    ],
+
+    # ===============================
+    # APPAREL / TEXTILE
+    # ===============================
+    "apparel": [
+        "garment manufacturing",
+        "textile industry",
+        "fashion merchandising",
+        "production planning",
+        "quality inspection"
+    ],
+
+    # ===============================
+    # ARTS
+    # ===============================
+    "arts": [
+        "fine arts",
+        "painting",
+        "sculpture",
+        "visual arts",
+        "creative design"
+    ],
+
+    # ===============================
+    # AVIATION
+    # ===============================
+    "aviation": [
+        "aircraft operations",
+        "airport management",
+        "flight operations",
+        "airline procedures",
+        "aviation safety regulations"
+    ],
+
+    # ===============================
+    # BPO / CUSTOMER SUPPORT
+    # ===============================
+    "bpo": [
+        "customer support",
+        "voice process",
+        "non voice process",
+        "crm tools",
+        "customer handling",
+        "escalation management",
+        "service quality"
+    ],
+
+    # ===============================
+    # CHEF / HOSPITALITY
+    # ===============================
+    "chef": [
+        "culinary arts",
+        "food preparation",
+        "menu planning",
+        "kitchen management",
+        "food safety",
+        "restaurant operations"
+    ],
+
+    # ===============================
+    # CONSULTING
+    # ===============================
+    "consultant": [
+        "consulting",
+        "advisory services",
+        "strategy consulting",
+        "management consulting",
+        "business strategy",
+        "process improvement"
+    ],
+
+    # ===============================
+    # DESIGN
+    # ===============================
+    "designer": [
+        "graphic design",
+        "ui design",
+        "ux design",
+        "product design",
+        "adobe photoshop",
+        "illustrator",
+        "figma"
+    ],
+
+    # ===============================
+    # DIGITAL MEDIA / MARKETING
+    # ===============================
+    "digital-media": [
+        "digital marketing",
+        "seo",
+        "social media marketing",
+        "content marketing",
+        "google ads",
+        "marketing analytics"
+    ],
+
+    # ===============================
+    # FITNESS / HEALTH
+    # ===============================
+    "fitness": [
+        "fitness training",
+        "personal training",
+        "nutrition",
+        "wellness coaching",
+        "health assessment"
+    ],
+
+    # ===============================
+    # SALES
+    # ===============================
+    "sales": [
+        "sales",
+        "business development",
+        "inside sales",
+        "field sales",
+        "lead generation",
+        "crm tools",
+        "negotiation skills"
+    ],
+
+    # ===============================
+    # ARCHITECTURE
+    # ===============================
+    "architect": [
+        "architecture",
+        "building design",
+        "planning",
+        "autocad",
+        "revit",
+        "3d modeling"
+    ],
+
+    # ===============================
+    # BUSINESS ANALYST
+    # ===============================
+    "business-analyst": [
+        "business analysis",
+        "requirement gathering",
+        "process analysis",
+        "documentation",
+        "stakeholder management"
+    ],
+
+    # ===============================
+    # EDUCATION
+    # ===============================
+    "education": [
+        "teaching",
+        "lecturing",
+        "curriculum development",
+        "training delivery",
+        "classroom management"
+    ],
+
+    # ===============================
+    # MANAGEMENT
     # ===============================
     "management": [
-        "project management",
         "operations management",
-        "business analysis",
-        "strategic planning",
-        "stakeholder management",
-        "risk management",
-        "process improvement",
+        "project management",
+        "program management",
+        "pmo",
         "leadership",
-        "team management"
+        "decision making"
+    ],
+
+    # ===============================
+    # PUBLIC RELATIONS
+    # ===============================
+    "public-relations": [
+        "public relations",
+        "media handling",
+        "press release",
+        "corporate communication",
+        "brand communication"
     ]
 }
+
 # ===============================
 # FLATTENED SKILL LIST
-# (Used by skill_engine.py)
+# (Used by jd_skill_engine.py)
 # ===============================
 SKILLS = sorted(
-    set(
+    {
         skill
         for domain_skills in SKILL_CONFIG.values()
         for skill in domain_skills
-    )
+    }
 )
