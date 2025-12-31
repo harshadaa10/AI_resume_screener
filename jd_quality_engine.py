@@ -1,5 +1,6 @@
 from skill_engine import extract_skills
 from domain_engine import detect_domain
+from math import ceil
 
 # ==========================
 # DOMAIN RELATIONSHIP MAP
@@ -171,53 +172,97 @@ GENERIC_KEYWORDS = [
 
 
 def analyze_jd_quality(jd_text):
-    """
-    Analyze Job Description quality and return feedback & suggestions
-    """
     jd_text_lower = jd_text.lower()
+
     jd_skills = extract_skills(jd_text_lower)
     jd_domain = detect_domain(jd_text_lower)
 
     feedback = []
     suggestions = []
 
-    # 1️⃣ Critical skill validation
+    total_score = 0
+
+    # ==========================
+    # 1️⃣ CRITICAL SKILLS SCORE (50)
+    # ==========================
     critical_skills = CRITICAL_SKILLS_BY_DOMAIN.get(jd_domain, [])
-    missing = [s for s in critical_skills if s not in jd_skills]
+    matched_critical = [s for s in critical_skills if s in jd_skills]
+    missing_critical = [s for s in critical_skills if s not in jd_skills]
 
     if critical_skills:
-        if missing:
-            feedback.append(
-                f"⚠️ Missing critical skills for {jd_domain}: {', '.join(missing)}"
-            )
-            suggestions.append(
-                f"Add these domain-specific skills: {', '.join(missing)}"
-            )
-        else:
-            feedback.append(f"✅ JD covers all critical skills for {jd_domain}")
+        critical_score = (len(matched_critical) / len(critical_skills)) * 50
+        critical_score = ceil(critical_score)
+    else:
+        critical_score = 0
 
-    # 2️⃣ Generic wording detection
-    generic_hits = [kw for kw in GENERIC_KEYWORDS if kw in jd_text_lower]
-    if generic_hits:
+    total_score += critical_score
+
+    if missing_critical:
         feedback.append(
-            "⚠️ JD contains generic phrases: " + ", ".join(generic_hits)
+            f"⚠️ Missing critical skills for {jd_domain}: {', '.join(missing_critical)}"
+        )
+        suggestions.append(
+            f"Add domain-specific skills: {', '.join(missing_critical)}"
+        )
+    else:
+        feedback.append(f"✅ Strong coverage of critical skills for {jd_domain}")
+
+    # ==========================
+    # 2️⃣ DOMAIN CLARITY SCORE (20)
+    # ==========================
+    if jd_domain != "Unknown":
+        total_score += 20
+        feedback.append(f"📌 Detected JD Domain: {jd_domain}")
+    else:
+        suggestions.append("Add clear role-specific keywords to define domain")
+
+    # ==========================
+    # 3️⃣ GENERIC WORDING PENALTY (15)
+    # ==========================
+    generic_hits = [kw for kw in GENERIC_KEYWORDS if kw in jd_text_lower]
+
+    if not generic_hits:
+        total_score += 15
+        feedback.append("✅ JD language is specific and professional")
+    elif len(generic_hits) <= 2:
+        total_score += 7
+        feedback.append(
+            f"⚠️ Some generic phrases detected: {', '.join(generic_hits)}"
         )
         suggestions.append(
             "Replace generic phrases with measurable responsibilities"
         )
     else:
-        feedback.append("✅ JD language is specific and professional")
+        feedback.append(
+            f"❌ Too many generic phrases: {', '.join(generic_hits)}"
+        )
+        suggestions.append(
+            "Rewrite JD using role-specific tools, metrics, and outcomes"
+        )
 
-    # 3️⃣ Domain clarity
-    if jd_domain == "Unknown":
-        feedback.append("❌ JD domain unclear")
-        suggestions.append("Add role-specific tools, technologies, or certifications")
-    else:
-        feedback.append(f"📌 Detected JD Domain: {jd_domain}")
+    # ==========================
+    # 4️⃣ SKILL DENSITY SCORE (15)
+    # ==========================
+    skill_count = len(jd_skills)
+
+    if skill_count >= 10:
+        total_score += 15
+    elif skill_count >= 5:
+        total_score += 10
+    elif skill_count >= 1:
+        total_score += 5
+
+    # ==========================
+    # FINAL NORMALIZED SCORE
+    # ==========================
+    total_score = min(total_score, 100)
 
     return {
-        "feedback": feedback,
-        "suggestions": suggestions,
+        "jd_quality_score": total_score,
         "jd_domain": jd_domain,
-        "jd_skills": jd_skills
+        "matched_critical_skills": matched_critical,
+        "missing_critical_skills": missing_critical,
+        "jd_skills": jd_skills,
+        "feedback": feedback,
+        "suggestions": suggestions
     }
