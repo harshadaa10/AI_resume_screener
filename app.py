@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 from fairness_engine import analyze_fairness
 from analytics_engine import generate_ats_analytics
 from ranking_engine import rank_resumes
-from explanation_engine import generate_explanation
+from explanation_engine import generate_explainability
 from verdict_engine import recruiter_verdict
 from summary_engine import generate_summary
 from human_loop_engine import save_feedback, analyze_feedback_trends
 from resume_fraud_engine import detect_resume_fraud
-from bias_engine import sanitize_resume_text
+from bias_engine import analyze_bias
 from jd_llm_engine import extract_skills_from_jd
 
 
@@ -371,7 +371,7 @@ with col2:
 # ==========================
 col_btn_space, col_btn = st.columns([3, 1])
 with col_btn:
-    run = st.button("🔍 Rank Resumes", use_container_width=True)
+    run = st.button("🔍 Rank Resumes", width="stretch")
 
 if run:
     if not uploaded_files or not jd_text.strip():
@@ -518,7 +518,7 @@ with col1:
         columns=["Domain", "Average Score (%)"]
     )
     domain_df["Average Score (%)"] = domain_df["Average Score (%)"].round(2)
-    st.dataframe(domain_df, use_container_width=True, hide_index=True)
+    st.dataframe(domain_df, width="stretch", hide_index=True)
 
 with col2:
     st.markdown("### Avg Score by Experience")
@@ -527,7 +527,7 @@ with col2:
         columns=["Experience Level", "Average Score (%)"]
     )
     exp_df["Average Score (%)"] = exp_df["Average Score (%)"].round(2)
-    st.dataframe(exp_df, use_container_width=True, hide_index=True)
+    st.dataframe(exp_df, width="stretch", hide_index=True)
 
 # ==========================
 # SUMMARY & ANALYTICS
@@ -553,22 +553,6 @@ with col4:
     st.metric("Rejections", summary["reject_count"])
 
 
-exp = filtered_results["explainability"]
-
-st.markdown(f"**Verdict:** {exp['verdict']}")
-
-jd_text = "..."  # Your job description text
-jd_skills = extract_skills_from_jd(jd_text)
-st.markdown("✅ **Strengths**")
-for s in exp["strengths"]:
-    st.write(f"- {s}")
-
-if exp["concerns"]:
-    st.markdown("⚠️ **Concerns**")
-    for c in exp["concerns"]:
-        st.write(f"- {c}")
-st.subheader("🧠 JD Extracted Skills")
-st.write(", ".join(jd_skills))
 
 # ==========================
 # SCORE DISTRIBUTION
@@ -587,7 +571,7 @@ if scores:
         ax.set_ylabel("Number of Candidates", fontsize=11, fontweight="bold")
         ax.set_title("Resume Score Distribution", fontsize=13, fontweight="bold")
         ax.grid(axis="y", alpha=0.3)
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig, width="stretch")
     
     with col2:
         st.markdown("### Score Stats")
@@ -646,49 +630,69 @@ else:
             unsafe_allow_html=True,
         )
         
-        # Explanation
-        st.markdown(generate_explanation(
-            res["resume"],
-            res["matched_skills"],
-            res["missing_skills"],
-            res["final_score"],
-        ))
+       # -----------------------------
+# 🧠 Explainability Section
+# -----------------------------
+exp = generate_explainability(res)
+
+st.markdown("### 🧠 Recruiter Explanation")
+
+st.write(f"**Verdict:** {exp['verdict']}")
+
+if exp["strengths"]:
+    st.markdown("**Strengths:**")
+    for s in exp["strengths"]:
+        st.write("•", s)
+
+if exp["concerns"]:
+    st.markdown("**Concerns:**")
+    for c in exp["concerns"]:
+        st.write("•", c)
+
 
         # Recruiter Override Section
-        with st.expander(f"✍️ Recruiter Notes & Override - {res['resume']}", expanded=False):
-            col1, col2 = st.columns([1, 1])
-            
-            with col1:
-                human_score = st.slider(
-                    "Adjust Score",
-                    0, 100,
-                    int(res["final_score"]),
-                    key=f"s_{idx}",
-                )
-            
-            with col2:
-                human_rec = st.selectbox(
-                    "Override Recommendation",
-                    ["Strong Hire", "Hire", "Hold", "Reject"],
-                    key=f"r_{idx}",
-                )
+unique_id = f"{idx}_{res['resume']}"
 
-            notes = st.text_area("Recruiter Notes", key=f"n_{idx}", height=80)
+with st.expander(f"✍️ Recruiter Notes & Override - {res['resume']}", expanded=False):
+    col1, col2 = st.columns([1, 1])
 
-            col_save, col_space = st.columns([1, 4])
-            with col_save:
-                if st.button("💾 Save Feedback", key=f"b_{idx}", use_container_width=True):
-                    save_feedback(
-                        res["resume"],
-                        res["final_score"],
-                        recruiter_verdict(res["final_score"]),
-                        human_score,
-                        human_rec,
-                        notes,
-                    )
-                    st.success("✅ Feedback saved!")
-        
-        st.markdown("---")
+    with col1:
+        human_score = st.slider(
+            "Adjust Score",
+            0, 100,
+            int(res["final_score"]),
+            key=f"s_{unique_id}",
+        )
+
+    with col2:
+        human_rec = st.selectbox(
+            "Override Recommendation",
+            ["Strong Hire", "Hire", "Hold", "Reject"],
+            key=f"r_{unique_id}",
+        )
+
+    notes = st.text_area(
+        "Recruiter Notes",
+        key=f"n_{unique_id}",
+        height=80,
+    )
+
+    col_save, col_space = st.columns([1, 4])
+    with col_save:
+        if st.button(
+            "💾 Save Feedback",
+            key=f"b_{unique_id}",
+            width="stretch",
+        ):
+            save_feedback(
+                res["resume"],
+                res["final_score"],
+                recruiter_verdict(res["final_score"]),
+                human_score,
+                human_rec,
+                notes,
+            )
+            st.success("✅ Feedback saved!")
 
 # ==========================
 # FEEDBACK ANALYTICS
@@ -726,14 +730,14 @@ with col2:
         data=open("ats_report_test.csv", "rb"),
         file_name="ats_report_test.csv",
         mime="text/csv",
-        use_container_width=True,
+       width="stretch",
     )
 
 st.markdown("---")
 st.markdown(
     """
     <div style="text-align: center; color: #666; margin-top: 30px; padding: 20px;">
-        <p><strong>AI Resume Screener</strong> | Powered by Advanced ML & Fairness Controls</p>
+        <p><strong>AI Resume Screener</strong> | Made by Harshada Suryawanshi</p>
         <p style="font-size: 0.9em;">© 2024 - Professional ATS Solution</p>
     </div>
     """,

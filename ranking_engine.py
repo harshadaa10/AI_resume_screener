@@ -30,20 +30,7 @@ except:
 
 
 def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
-    """
-    Rank resumes in a folder against a Job Description.
 
-    mode:
-        test   -> resumes deleted after ranking
-        stored -> permanent dataset
-
-    weights:
-        dict with keys: skill, experience, cert, domain_penalty
-    """
-
-    # --------------------------
-    # Default weights
-    # --------------------------
     if weights is None:
         weights = {
             "skill": 1.0,
@@ -59,24 +46,21 @@ def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
     # --------------------------
     jd_embedding = get_embedding(jd_text)
     jd_domain = detect_domain(jd_text)
+
     from jd_llm_engine import extract_skills_from_jd
-
     jd_skills = extract_skills_from_jd(jd_text)
-
 
     # --------------------------
     # Process resumes
     # --------------------------
     for resume_file in os.listdir(resume_folder):
+
         if not resume_file.lower().endswith(".pdf"):
             continue
 
         resume_path = os.path.join(resume_folder, resume_file)
 
         try:
-            # --------------------------
-            # Resume parsing
-            # --------------------------
             raw_text = extract_resume_text(resume_path)
             resume_text = clean_resume_text(raw_text)
 
@@ -84,20 +68,19 @@ def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
                 continue
 
             # --------------------------
-            # Bias Neutralization (TEXT LEVEL)
+            # Bias Neutralization
             # --------------------------
             if neutralize_bias_factors:
                 resume_text = neutralize_bias_factors(resume_text)
 
             # --------------------------
-            # Embeddings & similarity
+            # Similarity
             # --------------------------
             resume_embedding = get_embedding(resume_text)
-            similarity = calculate_similarity(resume_embedding, jd_embedding)
-            similarity = max(similarity, 0)
+            similarity = max(calculate_similarity(resume_embedding, jd_embedding), 0)
 
             # --------------------------
-            # Domain detection
+            # Domain
             # --------------------------
             resume_domain = detect_domain(resume_text)
             domain_penalty, penalty_reason = calculate_domain_penalty(
@@ -105,35 +88,35 @@ def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
             )
 
             # --------------------------
-            # Skill matching
+            # Skills
             # --------------------------
             skill_boost, matched_skills, missing_skills = evaluate_jd_skills(
                 jd_text, resume_text
             )
 
             # --------------------------
-            # Experience scoring
+            # Experience
             # --------------------------
             exp_boost, years_exp = experience_score(jd_text, resume_text)
 
             # --------------------------
-            # Certification scoring
+            # Certifications
             # --------------------------
             cert_boost, certifications = certification_score(jd_text, resume_text)
 
             # --------------------------
-            # BASE FINAL SCORE
+            # Base Score
             # --------------------------
             final_score = (
                 similarity * 100
-                + (skill_boost * weights["skill"])
-                + (exp_boost * weights["experience"])
-                + (cert_boost * weights["cert"])
-                - (abs(domain_penalty) * weights["domain_penalty"])
+                + skill_boost * weights["skill"]
+                + exp_boost * weights["experience"]
+                + cert_boost * weights["cert"]
+                - abs(domain_penalty) * weights["domain_penalty"]
             )
 
             # --------------------------
-            # FRAUD / INFLATION DETECTION
+            # Fraud Detection
             # --------------------------
             fraud_score = 0
             fraud_flags = []
@@ -143,19 +126,16 @@ def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
                 fraud_score = fraud_result.get("penalty", 0)
                 fraud_flags = fraud_result.get("flags", [])
 
-            final_score -= fraud_score
-            final_score = round(max(final_score, 0), 2)
-            
-            explainability = generate_explainability({
-            **results,
-            "final_score": final_score
-           })
+            final_score = round(max(final_score - fraud_score, 0), 2)
 
             # --------------------------
-            # Confidence & feedback
+            # Confidence
             # --------------------------
             confidence = confidence_level(final_score)
 
+            # --------------------------
+            # Feedback
+            # --------------------------
             feedback = generate_candidate_feedback(
                 matched_skills,
                 missing_skills,
@@ -164,7 +144,7 @@ def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
             )
 
             # --------------------------
-            # Hiring Recommendation
+            # Recommendation
             # --------------------------
             recommendation_data = hiring_recommendation({
                 "final_score": final_score,
@@ -175,22 +155,29 @@ def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
                 "experience_years": years_exp,
                 "certifications": certifications
             })
-            bias_result = analyze_bias(resume_text)
-            bias_flags = bias_result["bias_flags"]
-           
-            explainability = generate_explainability({
-    "matched_skills": matched_skills,
-    "missing_skills": missing_skills,
-    "experience_years": years_exp,
-    "resume_domain": resume_domain,
-    "jd_domain": jd_domain,
-    "certifications": certifications,
-    "final_score": final_score,
-    "bias_flags": bias_flags if "bias_flags" in locals() else []
-})
 
             # --------------------------
-            # Store result
+            # Bias Analysis
+            # --------------------------
+            bias_result = analyze_bias(resume_text)
+            bias_flags = bias_result.get("bias_flags", [])
+
+            # --------------------------
+            # Explainability (FINAL & CORRECT)
+            # --------------------------
+            explainability = generate_explainability({
+                "matched_skills": matched_skills,
+                "missing_skills": missing_skills,
+                "experience_years": years_exp,
+                "resume_domain": resume_domain,
+                "jd_domain": jd_domain,
+                "certifications": certifications,
+                "final_score": final_score,
+                "bias_flags": bias_flags
+            })
+
+            # --------------------------
+            # Store Result
             # --------------------------
             results.append({
                 "resume": resume_file,
@@ -214,23 +201,15 @@ def rank_resumes(resume_folder, jd_text, mode="test", weights=None):
                 "recommended_action": recommendation_data["action"],
                 "recommendation_reasoning": recommendation_data["reasoning"],
                 "bias_flags": bias_flags,
-                "explainability": explainability,
-
-
+                "explainability": explainability
             })
 
         finally:
-            # --------------------------
-            # Delete test resumes
-            # --------------------------
             if mode == "test":
                 try:
                     os.remove(resume_path)
                 except:
                     pass
 
-    # --------------------------
-    # Sort by final score
-    # --------------------------
     results.sort(key=lambda x: x["final_score"], reverse=True)
     return results
