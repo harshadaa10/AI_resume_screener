@@ -137,11 +137,8 @@ Streamlit UI
 - pandas, numpy, matplotlib
 - pdfplumber, pytesseract (OCR)
 - scikit-learn
-
-> Exact versions and dependencies can be found in `requirements.txt`
-
+  
 ---
-
 🧪 Testing
 
 This project includes automated tests covering:
