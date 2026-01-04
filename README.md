@@ -86,11 +86,6 @@ Streamlit UI
 - pdfplumber, pytesseract (OCR)
 - scikit-learn
 
-> Exact versions and dependencies can be found in `requirements.txt`
-
----
-
-
 ---
 
 ## 🛠️ Tech Stack & Dependencies
