@@ -144,7 +144,7 @@ def calculate_domain_penalty(jd_domain: str, resume_domain: str):
 
     # ---------- PERFECT MATCH ----------
     if jd_domain == resume_domain:
-        return 0, "Perfect domain match"
+        return 10, "Perfect domain match"
 
     # ---------- RELATED DOMAIN ----------
     related = RELATED_DOMAINS.get(jd_domain, [])

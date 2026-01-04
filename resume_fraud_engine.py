@@ -93,3 +93,29 @@ def detect_resume_fraud(resume_text: str, jd_text: str):
         "penalty": fraud_penalty,
         "flags": fraud_flags
     }
+
+# =========================
+# ✅ TEST-COMPATIBLE WRAPPER
+# =========================
+def analyze_resume_fraud(resume_text: str, skills=None):
+    """
+    Wrapper for pytest compatibility.
+    Converts penalty score into risk level.
+    """
+
+    result = detect_resume_fraud(resume_text, jd_text="")
+
+    penalty = result["penalty"]
+
+    if penalty <= 5:
+        risk_level = "LOW RISK"
+    elif penalty <= 15:
+        risk_level = "MEDIUM RISK"
+    else:
+        risk_level = "HIGH RISK"
+
+    return {
+        "risk_level": risk_level,
+        "fraud_score": penalty,
+        "flags": result["flags"]
+    }

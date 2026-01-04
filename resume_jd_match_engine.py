@@ -21,28 +21,30 @@ def calculate_resume_jd_match(jd_text, resume_text):
     # 1️⃣ SKILL MATCH SCORE (50)
     # ==========================
     if jd_skills:
-        skill_match_score = (len(matched_skills) / len(jd_skills)) * 50
+        skill_match_score = (len(matched_skills) / max(len(jd_skills), 1)) * 60
     else:
         skill_match_score = 0
 
-    # ==========================
-    # 2️⃣ WEIGHTED SKILL SCORE (20)
-    # ==========================
+# ==========================
+# 2️⃣ WEIGHTED SKILL SCORE (20)
+# ==========================
     weighted_score = 0
     for skill in matched_skills:
-        for category, weight in SKILL_WEIGHTS.items():
-            if skill in category:
-                weighted_score += weight
+     if skill in SKILL_WEIGHTS:
+        weighted_score += SKILL_WEIGHTS[skill]
 
     weighted_score = min(weighted_score, 20)
+
 
     # ==========================
     # 3️⃣ MUST-HAVE PENALTY (-30)
     # ==========================
     must_haves = MUST_HAVE_SKILLS.get(jd_domain.lower(), [])
-    missing_must_haves = [s for s in must_haves if s not in resume_text]
-
-    must_have_penalty = min(len(missing_must_haves) * 10, 30)
+    missing_must_haves = [
+    s for s in must_haves
+    if s not in resume_text and s in jd_text
+]
+    must_have_penalty = min(len(missing_must_haves) * 5, 20)
 
     # ==========================
     # 4️⃣ DOMAIN PENALTY (-20)
