@@ -107,32 +107,6 @@ Streamlit UI
 - pdfplumber, pytesseract (OCR)
 - scikit-learn
 
-> Exact versions and dependencies can be found in `requirements.txt`
-
----
-
-
----
-
-## 🛠️ Tech Stack & Dependencies
-
-**Language & Frameworks**
-- Python 3.x  
-- Streamlit (UI)
-
-**AI & NLP**
-- `sentence-transformers` (embeddings)
-- Semantic similarity scoring
-- Rule + heuristic NLP logic  
-
-**Testing**
-- PyTest for unit, integration, pipeline tests
-
-**Libraries**
-- pandas, numpy, matplotlib
-- pdfplumber, pytesseract (OCR)
-- scikit-learn
-  
 ---
 🧪 Testing
 
